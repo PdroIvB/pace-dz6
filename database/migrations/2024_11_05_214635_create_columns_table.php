@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('columns', function (Blueprint $table) {
             $table->id();
-            $table->string('column_name');
+            $table->string('name');
             $table->foreignId('workspace_id');
-            $table->unsignedTinyInteger('sequece');
+            $table->unsignedTinyInteger('sequence');
             $table->timestamps();
         });
     }
