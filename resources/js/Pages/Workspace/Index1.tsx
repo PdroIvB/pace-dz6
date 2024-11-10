@@ -5,91 +5,64 @@ import { Workspace } from "@/types/workspace";
 import { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
-import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import {
+    DragDropContext,
+    DraggableLocation,
+    Droppable,
+    DropResult,
+} from "react-beautiful-dnd";
 import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
-import axios from "axios";
 import { useAxios } from "@/hooks/useAxios";
 import useToast from "@/hooks/useToast";
 
-// const reorder = (list: any, startIndex: number, endIndex: number) => {
-//     const result = Array.from(list);
-//     const [removed] = result.splice(startIndex, 1);
-//     result.splice(endIndex, 0, removed);
+const reorder = (
+    list: Array<ColumnType | Task> | undefined,
+    startIndex: number,
+    endIndex: number
+) => {
+    if (!list) return;
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+};
 
-//     return result;
-// };
+// Helper function to move an item between two arrays
+const move = (
+    source: Array<Task>,
+    destination: Array<Task>,
+    droppableSource: DraggableLocation,
+    droppableDestination: DraggableLocation
+) => {
+    if (!source || !destination) return;
 
-// export const reorderTaskMap = ({
-//     taskMap,
-//     source,
-//     destination,
-// }: {
-//     taskMap: any;
-//     source: any;
-//     destination: any;
-// }) => {
-//     // const current = [...taskMap[source.droppableId]];
-//     const current = taskMap.findIndex(source.droppableId);
-//     const next = [...taskMap[destination.droppableId]];
-//     const target = current[source.index];
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
 
-//     // moving to same list
-//     if (source.droppableId === destination.droppableId) {
-//         const reordered = reorder(current, source.index, destination.index);
-//         const result = {
-//             ...taskMap,
-//             [source.droppableId]: reordered,
-//         };
-//         return {
-//             taskMap: result,
-//         };
-//     }
+    destClone.splice(droppableDestination.index, 0, removed);
 
-//     // moving to different list
-
-//     // remove from original
-//     current.splice(source.index, 1);
-//     // insert into next
-//     next.splice(destination.index, 0, target);
-
-//     const result = {
-//         ...taskMap,
-//         [source.droppableId]: current,
-//         [destination.droppableId]: next,
-//     };
-
-//     return {
-//         quoteMap: result,
-//     };
-// };
+    return {
+        sourceItems: sourceClone as Task[],
+        destinationItems: destClone as Task[],
+    };
+};
 
 export default function Index({
     workspace,
-    containerHeight,
-    isCombineEnabled = false,
-    useClone,
     auth,
 }: PageProps & {
     workspace: Workspace;
-    containerHeight: any;
-    isCombineEnabled: boolean;
-    withScrollableColumns: any;
-    useClone: any;
 }) {
     const { axiosInstance } = useAxios();
     const showToast = useToast();
 
-    // const [columns, setColumns] = useState<ColumnType[] | []>(
-    const [columns, setColumns] = useState<any>(
+    const [columns, setColumns] = useState<ColumnType[] | []>(
         workspace.columns ?? []
     );
 
-    // const [ordered, setOrdered] = useState<any>(
-    //     Object.keys(workspace.columns ?? {})
-    // );
-
-    const onDragEnd = (result: any) => {
+    const onDragEnd = (result: DropResult) => {
         // console.log(result);
 
         // dropped nowhere
@@ -99,6 +72,8 @@ export default function Index({
 
         const source = result.source;
         const destination = result.destination;
+        const [draggableType, draggableId] =
+            result.draggableId.split(/-(?=\d+)/);
 
         // did not move anywhere - can bail early
         if (
@@ -110,56 +85,130 @@ export default function Index({
 
         // reordering column
         if (result.type === "COLUMN") {
-
-            const column = columns.find((column: any) => column.sequence === source.index);
+            const column = columns.find(
+                (column: ColumnType) => column.id === parseInt(draggableId, 10)
+            );
+            if (!column) return;
 
             const newSequence = destination.index;
 
-            setColumns((prevColumns: any) => {
+            setColumns((prevColumns: ColumnType[]) => {
                 const updatedColumns = [...prevColumns];
-                const movedColumn = updatedColumns.find(col => col.id === column.id);
-                const oldSequence = movedColumn.sequence;
-        
+                const movedColumn = updatedColumns.find(
+                    (col) => col.id === column!.id
+                );
+                const oldSequence = movedColumn!.sequence;
+
                 // Update sequences for all affected columns
-                updatedColumns.forEach(col => {
-                if (newSequence < oldSequence) {
-                    // Moving forward (e.g., 3 → 1)
-                    if (col.sequence >= newSequence && col.sequence < oldSequence) {
-                    col.sequence += 1;
+                updatedColumns.forEach((col) => {
+                    if (newSequence < oldSequence) {
+                        // Moving forward (e.g., 3 → 1)
+                        if (
+                            col.sequence >= newSequence &&
+                            col.sequence < oldSequence
+                        ) {
+                            col.sequence += 1;
+                        }
+                    } else {
+                        // Moving backward (e.g., 1 → 3)
+                        if (
+                            col.sequence > oldSequence &&
+                            col.sequence <= newSequence
+                        ) {
+                            col.sequence -= 1;
+                        }
                     }
-                } else {
-                    // Moving backward (e.g., 1 → 3)
-                    if (col.sequence > oldSequence && col.sequence <= newSequence) {
-                    col.sequence -= 1;
-                    }
-                }
                 });
-        
+
                 // Update the moved column's sequence
-                movedColumn.sequence = newSequence;
-        
+                movedColumn!.sequence = newSequence;
+
                 // Sort columns by sequence
                 return updatedColumns.sort((a, b) => a.sequence - b.sequence);
             });
 
-            axiosInstance.put(`/workspace/${workspace.id}/${column.id}`, {newSequence: newSequence})
+            axiosInstance
+                .put(`/workspace/${workspace.id}/${column.id}`, {
+                    newSequence: newSequence+1,
+                })
                 .then((response) => {})
                 .catch((error) => {
                     console.error(error);
-                    showToast('Erro ao reordenar colunas!', 'error');
+                    showToast("Erro ao reordenar colunas!", "error");
                 });
 
             return;
         }
 
-        // const data = reorderTaskMap({
-        //     taskMap: columns,
-        //     source,
-        //     destination,
-        // });
+        if (result.type === "TASK") {
+            //ordering within the same column
+            if (source.droppableId === destination.droppableId) {
 
-        // setColumns(data.quoteMap);
-        // console.log("SUCCESS?");
+                const colId = parseInt(
+                    destination.droppableId.split(/-(?=\d+)/)[1],
+                    10
+                );
+
+                const column = columns.find((col) => col.id === colId);
+                if (!column) return;
+
+                const tasks = reorder(
+                    column!.tasks ?? [],
+                    source.index,
+                    destination.index
+                );
+
+                column.tasks = tasks;
+
+                setColumns((prevState) =>
+                    prevState.map((col) =>
+                        col.id === column.id ? column : col
+                    )
+                );
+
+                return;
+            } else {
+                const sourceColumnId = parseInt(
+                    source.droppableId.split(/-(?=\d+)/)[1],
+                    10
+                );
+                const destinationColumnId = parseInt(
+                    destination.droppableId.split(/-(?=\d+)/)[1],
+                    10
+                );
+
+                const sourceColumn = columns.find(
+                    (col) => col.id === sourceColumnId
+                );
+                const destinationColumn = columns.find(
+                    (col) => col.id === destinationColumnId
+                );
+                if (!sourceColumn || !destinationColumn) return;
+
+                const result = move(
+                    sourceColumn.tasks ?? [],
+                    destinationColumn.tasks ?? [],
+                    source,
+                    destination
+                );
+
+                if (!result) return;
+
+                const { sourceItems, destinationItems } = result;
+                sourceColumn.tasks = sourceItems;
+                destinationColumn.tasks = destinationItems;
+
+                setColumns((prevState) =>
+                    prevState.map((col) =>
+                        col.id === sourceColumn.id ? sourceColumn : col.id === destinationColumn.id ? destinationColumn : col
+                    )
+                );
+                return;
+
+            }
+        }
+
+        return;
     };
 
     return (
@@ -171,8 +220,6 @@ export default function Index({
                         droppableId="board"
                         type="COLUMN"
                         direction="horizontal"
-                        ignoreContainerClipping={Boolean(containerHeight)}
-                        isCombineEnabled={isCombineEnabled}
                     >
                         {(provided) => (
                             <div className="pb-12 pt-4">
@@ -182,24 +229,20 @@ export default function Index({
                                         {...provided.droppableProps}
                                         className="flex gap-6 overflow-x-auto pb-4"
                                     >
-                                        {/* {ordered.map((key, index) => { */}
-                                        {columns.map((column:any, index:any) => {
-                                            return (
-                                                <Column1
-                                                    column={column}
-                                                    index={column.sequence}
-                                                    key={column.id}
-                                                    name={column.name}
-                                                    id={`${column.id}`}
-                                                    tasks={column.tasks}
-                                                    isScrollable={true}
-                                                    isCombineEnabled={
-                                                        isCombineEnabled
-                                                    }
-                                                    useClone={useClone}
-                                                />
-                                            );
-                                        })}
+                                        {columns.map(
+                                            (
+                                                column: ColumnType,
+                                                index: number
+                                            ) => {
+                                                return (
+                                                    <Column1
+                                                        key={column.id}
+                                                        column={column}
+                                                        index={index}
+                                                    />
+                                                );
+                                            }
+                                        )}
                                         {provided.placeholder}
                                     </div>
                                 </div>
