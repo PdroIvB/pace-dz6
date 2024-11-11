@@ -46,7 +46,7 @@ class WorkspaceController extends Controller
         $workspace->load('columns.tasks');
         // $columns = $workspace->columns()->with('tasks');
 
-        return Inertia::render('Workspace/Index1', compact('workspace'));
+        return Inertia::render('Workspace/Index', compact('workspace'));
     }
 
     /**
