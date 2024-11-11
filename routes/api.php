@@ -1,8 +1,7 @@
 <?php
 
 use App\Http\Controllers\ColumnController;
-use App\Models\Column;
-use App\Models\Workspace;
+use App\Http\Controllers\WorkspaceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,5 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware(['auth:sanctum', 'transform.keys'])
-    ->put('/workspace/{workspace}/{column}', [ColumnController::class, 'updateSequence']);
+Route::middleware(['auth:sanctum', 'transform.keys'])->group(function () {
+    Route::put('/workspace/{workspace}/column/{column}', [WorkspaceController::class, 'reorderColumns']);
+    Route::put('/workspace/{workspace}/column/{column}/task/{task}', [ColumnController::class, 'reorderTasks']);
+    Route::put('/workspace/{workspace}/column/{column}/task/{task}/move', [ColumnController::class, 'moveTask']);
+});

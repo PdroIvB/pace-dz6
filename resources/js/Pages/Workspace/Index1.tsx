@@ -63,7 +63,6 @@ export default function Index({
     );
 
     const onDragEnd = (result: DropResult) => {
-        // console.log(result);
 
         // dropped nowhere
         if (!result.destination) {
@@ -90,46 +89,17 @@ export default function Index({
             );
             if (!column) return;
 
-            const newSequence = destination.index;
+            const orderedColumns = reorder(
+                columns,
+                source.index,
+                destination.index
+            );
 
-            setColumns((prevColumns: ColumnType[]) => {
-                const updatedColumns = [...prevColumns];
-                const movedColumn = updatedColumns.find(
-                    (col) => col.id === column!.id
-                );
-                const oldSequence = movedColumn!.sequence;
-
-                // Update sequences for all affected columns
-                updatedColumns.forEach((col) => {
-                    if (newSequence < oldSequence) {
-                        // Moving forward (e.g., 3 → 1)
-                        if (
-                            col.sequence >= newSequence &&
-                            col.sequence < oldSequence
-                        ) {
-                            col.sequence += 1;
-                        }
-                    } else {
-                        // Moving backward (e.g., 1 → 3)
-                        if (
-                            col.sequence > oldSequence &&
-                            col.sequence <= newSequence
-                        ) {
-                            col.sequence -= 1;
-                        }
-                    }
-                });
-
-                // Update the moved column's sequence
-                movedColumn!.sequence = newSequence;
-
-                // Sort columns by sequence
-                return updatedColumns.sort((a, b) => a.sequence - b.sequence);
-            });
+            setColumns(orderedColumns as ColumnType[]);
 
             axiosInstance
-                .put(`/workspace/${workspace.id}/${column.id}`, {
-                    newSequence: newSequence+1,
+                .put(`/workspace/${workspace.id}/column/${column.id}`, {
+                    newSequence: destination.index+1,
                 })
                 .then((response) => {})
                 .catch((error) => {
@@ -165,6 +135,16 @@ export default function Index({
                         col.id === column.id ? column : col
                     )
                 );
+
+                axiosInstance
+                    .put(`/workspace/${workspace.id}/column/${column.id}/task/${draggableId}`, {
+                        newSequence: destination.index+1,
+                    })
+                    .then((response) => {})
+                    .catch((error) => {
+                        console.error(error);
+                        showToast("Erro ao reordenar tarefas!", "error");
+                    });
 
                 return;
             } else {
@@ -203,8 +183,19 @@ export default function Index({
                         col.id === sourceColumn.id ? sourceColumn : col.id === destinationColumn.id ? destinationColumn : col
                     )
                 );
-                return;
 
+                axiosInstance
+                    .put(`/workspace/${workspace.id}/column/${sourceColumnId}/task/${draggableId}/move`, {
+                        newSequence: destination.index+1,
+                        destinationColumnId: destinationColumnId
+                    })
+                    .then((response) => {})
+                    .catch((error) => {
+                        console.error(error);
+                        showToast("Erro ao mover tarefa!", "error");
+                    });
+
+                return;
             }
         }
 

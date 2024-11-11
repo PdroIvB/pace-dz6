@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Column;
 use App\Models\Workspace;
+use App\Services\ReorderingService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WorkspaceController extends Controller
 {
+    public function __construct(
+        protected ReorderingService $reorderingService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -65,5 +71,20 @@ class WorkspaceController extends Controller
     public function destroy(Workspace $workspace)
     {
         //
+    }
+
+    public function reorderColumns(Request $request, Workspace $workspace, Column $column)
+    {
+        $validated = $request->validate([
+            'new_sequence' => 'required|integer|min:1',
+        ]);
+
+        try {
+            $this->reorderingService->reorder(Column::class, $column, $validated['new_sequence'], 'workspace_id', $workspace->id);
+
+            return response()->json(['message' => 'Column reordered successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to reorder column'], 500);
+        }
     }
 }
