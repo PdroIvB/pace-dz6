@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateWorkspaceRequest;
 use App\Models\Column;
 use App\Models\Workspace;
 use App\Services\ReorderingService;
+use App\Services\WorkspaceService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WorkspaceController extends Controller
 {
     public function __construct(
-        protected ReorderingService $reorderingService
+        protected ReorderingService $reorderingService,
+        protected WorkspaceService $workspaceService,
     ) {}
 
     /**
@@ -33,9 +36,18 @@ class WorkspaceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateWorkspaceRequest $request)
     {
-        //
+        try {
+            $workspace = $this->workspaceService->create($request->validated());
+
+            return redirect()->route('workspace.show', [$workspace]);
+
+        } catch (\Throwable $th) {
+
+            return redirect()->back()
+                ->with('error', 'Falha ao criar Área de Trabalho');
+        }
     }
 
     /**
@@ -44,7 +56,6 @@ class WorkspaceController extends Controller
     public function show(Workspace $workspace)
     {
         $workspace->load('columns.tasks');
-        // $columns = $workspace->columns()->with('tasks');
 
         return Inertia::render('Workspace/Index', compact('workspace'));
     }

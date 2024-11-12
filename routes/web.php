@@ -34,7 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/workspace/{workspace}', [WorkspaceController::class, 'show']);
+    Route::get('/workspace/{workspace}', [WorkspaceController::class, 'show'])->name('workspace.show');
+    Route::post('/workspace', [WorkspaceController::class, 'store']);
 });
 
 require __DIR__.'/auth.php';
