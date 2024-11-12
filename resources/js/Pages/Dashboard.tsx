@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import WorkspaceCreateForm from "./Workspace/CreateForm";
+import WorkspaceCreateForm from "../Components/Workspace/CreateForm";
 
 type ExtendedWorkspace = Workspace & {
     tasks_count: number;
@@ -58,10 +58,6 @@ export default function Dashboard({
 
             <div className="pb-12 pt-4">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
-                    {/* <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg w-full">
-                        <div className="p-6 text-gray-900">You're logged in!</div>
-                    </div> */}
-
                     {recentWorkspaces && recentWorkspaces.length > 0 && (
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg w-full">
                             <h2 className="font-semibold text-xl text-gray-800 leading-tight p-2">
@@ -102,53 +98,6 @@ export default function Dashboard({
                                 submit={createWorkspace}
                                 reset={reset}
                             />
-                            {/* {!creatingWorkspace ? (
-                                <button
-                                    onClick={() =>
-                                        setCreatingWorkspace((prev) => !prev)
-                                    }
-                                    className="bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-gray-100 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-2"
-                                >
-                                    <Plus className="w-8 h-8 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-500">
-                                        Add New Workspace
-                                    </span>
-                                </button>
-                            ) : (
-                                <form
-                                    onSubmit={handleSubmit(createWorkspace)}
-                                    className="p-8 rounded-xl border-2 transition-all duration-200 ease-in-out shadow-sm hover:shadow-md bg-white max-w-md w-full flex flex-col items-center justify-center gap-4 border-gray-200 hover:border-gray-300"
-                                >
-                                    <div className="w-full">
-                                        <input
-                                            type="text"
-                                            placeholder="Nome da área de trabalho"
-                                            className={`w-full px-4 py-3 rounded-lg transition-all duration-200 bg-gray-50 hover:bg-gray-100 focus:bg-white outline-none border-2 ${errors.workspace_name ? "border-red-400 focus:border-red-500" : "border-gray-200 focus:border-blue-500"} placeholder-gray-400 text-gray-800`}
-                                            {...register("workspace_name", {
-                                                required:
-                                                    "Nome da área é obrigatório",
-                                                minLength: {
-                                                    value: 3,
-                                                    message:
-                                                        "Nome deve ter pelo menos 3 caracteres",
-                                                },
-                                            })}
-                                        />
-                                        {errors.workspace_name && (
-                                            <p className="mt-2 text-sm text-red-500 pl-1">
-                                                {errors.workspace_name.message}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        className="px-6 py-3 rounded-lg transition-all duration-200 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-medium shadow-sm hover:shadow w-full md:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Criar workspace
-                                    </button>
-                                </form>
-                            )} */}
                         </div>
                     </div>
 

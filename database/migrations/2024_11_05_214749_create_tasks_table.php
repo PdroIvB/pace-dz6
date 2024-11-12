@@ -17,10 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->unsignedTinyInteger('sequence');
+            $table->integer('sequence');
             $table->foreignIdFor(User::class, 'assignee_id')->nullable();
-            $table->foreignIdFor(Column::class, 'column_id')->nullable();
+            $table->foreignIdFor(Column::class, 'column_id');
             $table->timestamps();
+
+            $table->index(['column_id', 'sequence']);
         });
     }
 

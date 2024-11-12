@@ -2,7 +2,7 @@ import Column from "@/Components/Workspace/Column";
 import { Column as ColumnType } from "@/types/column";
 import { Task } from "@/types/task";
 import { Workspace } from "@/types/workspace";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import {
@@ -15,6 +15,7 @@ import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { useAxios } from "@/hooks/useAxios";
 import useToast from "@/hooks/useToast";
+import { Plus } from "lucide-react";
 
 const reorder = (
     list: Array<ColumnType | Task> | undefined,
@@ -58,9 +59,7 @@ export default function Index({
     const { axiosInstance } = useAxios();
     const showToast = useToast();
 
-    const [columns, setColumns] = useState<ColumnType[] | []>(
-        workspace.columns ?? []
-    );
+    const [columns, setColumns] = useState<ColumnType[] | []>(workspace.columns || []);
 
     const onDragEnd = (result: DropResult) => {
 
@@ -206,41 +205,55 @@ export default function Index({
         <>
             <AuthenticatedLayout user={auth.user}>
                 <Head title={workspace.name} />
-                <DragDropContext onDragEnd={onDragEnd}>
-                    <Droppable
-                        droppableId="board"
-                        type="COLUMN"
-                        direction="horizontal"
-                    >
-                        {(provided) => (
-                            <div className="pb-12 pt-4">
-                                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className="flex gap-6 overflow-x-auto pb-4"
-                                    >
-                                        {columns.map(
-                                            (
-                                                column: ColumnType,
-                                                index: number
-                                            ) => {
-                                                return (
-                                                    <Column
-                                                        key={column.id}
-                                                        column={column}
-                                                        index={index}
-                                                    />
-                                                );
-                                            }
-                                        )}
-                                        {provided.placeholder}
+                <div className="max-h-full">
+                    <div className="py-4 pl-8">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            {workspace.name}
+                        </h1>
+                    </div>
+                    <div className="">
+                        <DragDropContext onDragEnd={onDragEnd}>
+                            <Droppable
+                                droppableId="board"
+                                type="COLUMN"
+                                direction="horizontal"
+                            >
+                                {(provided, snapshot) => (
+                                    <div className={`${snapshot.isDraggingOver ? "bg-green-200" : ""}`}>
+                                        <div className="w-full mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.droppableProps}
+                                                className="flex gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 h-[calc(100svh-125px)] "
+                                            >
+                                                {columns.map(
+                                                    (
+                                                        column: ColumnType,
+                                                        index: number
+                                                    ) => {
+                                                        return (
+                                                            <Column
+                                                                key={column.id}
+                                                                column={column}
+                                                                index={index}
+                                                            />
+                                                        );
+                                                    }
+                                                )}
+                                                {provided.placeholder}
+                                                <div className="bg-gray-300 max-h-fit w-80 min-w-fit rounded-xl p-4 bg-opacity-40 hover:bg-gray-400 hover:bg-opacity-40 cursor-pointer">
+                                                    <div className="flex gap-2 flex-shrink-0">
+                                                        <Plus/><p className="">Adicionar outra lista</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        )}
-                    </Droppable>
-                </DragDropContext>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
+                    </div>
+                </div>
             </AuthenticatedLayout>
         </>
     );

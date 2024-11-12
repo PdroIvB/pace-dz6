@@ -27,10 +27,10 @@ export default function Authenticated({
     }, [flash]);
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="h-screen bg-gray-50">
             <nav className="bg-white border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
+                    <div className="flex justify-between h-12">
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
                                 <Link href="/">
@@ -185,7 +185,7 @@ export default function Authenticated({
                 </header>
             )}
 
-            <main>{children}</main>
+            <main className="h-[calc(100%-49px)]">{children}</main>
         </div>
     );
 }

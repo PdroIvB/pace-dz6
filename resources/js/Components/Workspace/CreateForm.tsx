@@ -6,7 +6,7 @@ import {
     UseFormRegister,
     UseFormReset,
 } from "react-hook-form";
-import { createWorkspaceType } from "../Dashboard";
+import { createWorkspaceType } from "../../Pages/Dashboard";
 
 type WorkspaceCreateFormProps = {
     setCreatingWorkspace: React.Dispatch<React.SetStateAction<boolean>>;

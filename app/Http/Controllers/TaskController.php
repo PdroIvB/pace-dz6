@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateTaskRequest;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
@@ -26,9 +27,16 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateTaskRequest $request)
     {
-        //
+        // logger(json_encode($request->all(), JSON_PRETTY_PRINT));
+
+        $task = Task::create($request->validated());
+
+        // return new Task();
+        // return back()->with('success', 'Cartão criado com sucesso!');
+        return response()->json(compact('task'));
+        // return to_route('workspace.show');
     }
 
     /**
