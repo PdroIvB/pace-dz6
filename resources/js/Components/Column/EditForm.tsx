@@ -19,23 +19,26 @@ type EditFormProps = {
     reset: UseFormReset<createColumnType>;
 };
 
-const EditForm = forwardRef(function EditForm ({
-    editingColumn,
-    setEditingColumn,
-    column,
-    handleSubmit,
-    formState,
-    register,
-    reset,
-    submit,
-}: EditFormProps, ref: LegacyRef<HTMLFormElement> | undefined) {
-
+const EditForm = forwardRef(function EditForm(
+    {
+        editingColumn,
+        setEditingColumn,
+        column,
+        handleSubmit,
+        formState,
+        register,
+        reset,
+        submit,
+    }: EditFormProps,
+    ref: LegacyRef<HTMLFormElement> | undefined
+) {
     const { errors, isValid } = formState;
 
     if (!editingColumn) {
         return (
-            <button onClick={() => setEditingColumn(true)}
-                className="w-fit px-1 py-[5px] rounded-lg hover:bg-gray-100 focus:bg-white text-start"
+            <button
+                onClick={() => setEditingColumn(true)}
+                className="w-fit px-[5px] py-[5px] rounded-lg focus:bg-white text-start"
             >
                 <h2 className="font-semibold text-gray-700">{column.name}</h2>
             </button>
@@ -43,16 +46,15 @@ const EditForm = forwardRef(function EditForm ({
     }
 
     return (
-        <form onSubmit={handleSubmit(submit)} ref={ref} className="w-fit">
-            <div className="w-fit">
+        <form onSubmit={handleSubmit(submit)} ref={ref} className="w-full">
+            <div className="">
                 <input
                     type="text"
-                    placeholder="Título da lista"
-                    className={`w-fit text-start px-1 py-1 rounded-lg transition-all duration-200 bg-gray-50 hover:bg-gray-100  focus:bg-white ${
+                    className={`w-full text-start px-1 py-1 rounded-lg bg-gray-50 hover:bg-gray-100  focus:bg-white ${
                         errors.name
                             ? "border-red-400 focus:border-red-500"
                             : "border-gray-200 focus:border-blue-500"
-                    } placeholder-gray-400 text-gray-800 font-bold`}
+                    } text-gray-800 font-bold`}
                     {...register("name")}
                     autoFocus
                 />

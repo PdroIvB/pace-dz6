@@ -34,7 +34,7 @@ export default function Login({ status, canResetPassword }: { status?: string, c
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="E-mail" />
 
                     <TextInput
                         id="email"
@@ -51,7 +51,7 @@ export default function Login({ status, canResetPassword }: { status?: string, c
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                    <InputLabel htmlFor="password" value="Senha" />
 
                     <TextInput
                         id="password"
@@ -66,15 +66,21 @@ export default function Login({ status, canResetPassword }: { status?: string, c
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="block mt-4">
+                <div className="mt-4 flex justify-between">
                     <label className="flex items-center">
                         <Checkbox
                             name="remember"
                             checked={data.remember}
                             onChange={(e) => setData('remember', e.target.checked)}
                         />
-                        <span className="ms-2 text-sm text-gray-600">Remember me</span>
+                        <span className="ms-2 text-sm text-gray-600">Lembrar de mim</span>
                     </label>
+                    <Link
+                        href={route('register')}
+                        className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Ainda não tem conta?
+                    </Link>
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
@@ -83,7 +89,7 @@ export default function Login({ status, canResetPassword }: { status?: string, c
                             href={route('password.request')}
                             className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
-                            Forgot your password?
+                            Esqueci minha senha
                         </Link>
                     )}
 

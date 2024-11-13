@@ -1,6 +1,6 @@
 import { Column } from "@/types/column";
 import { Edit, Plus, Trash } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef } from "react";
 
 type DropDownType = {
     column: Column;
@@ -8,6 +8,7 @@ type DropDownType = {
     openDropdown: boolean;
     setCreatingTask: React.Dispatch<React.SetStateAction<boolean>>;
     setEditingColumn: React.Dispatch<React.SetStateAction<boolean>>;
+    deleteColumn: () => void;
 };
 
 const ColumnDropdown = ({
@@ -16,6 +17,7 @@ const ColumnDropdown = ({
     openDropdown,
     setCreatingTask,
     setEditingColumn,
+    deleteColumn,
 }: DropDownType) => {
     const dropRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,7 +61,10 @@ const ColumnDropdown = ({
                 <Edit className="w-4 h-4 mr-3" />
             </button>
             <hr className="my-2 border-gray-200" />
-            <button className="flex items-center justify-around w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <button
+                onClick={deleteColumn}
+                className="flex items-center justify-around w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
                 Deletar lista
                 <Trash className="w-4 h-4 mr-3" />
             </button>

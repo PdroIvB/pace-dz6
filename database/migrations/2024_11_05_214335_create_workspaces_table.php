@@ -15,7 +15,9 @@ return new class extends Migration
         Schema::create('workspaces', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignIdFor(User::class, 'owner_id');
+            $table->foreignId('owner_id')->constrained(
+                table: 'users', indexName: 'workspaces_user_id'
+            )->cascadeOnDelete();
             $table->timestamps();
         });
     }

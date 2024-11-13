@@ -11,6 +11,7 @@ import { useAxios } from "@/hooks/useAxios";
 import { createColumnType } from "@/Pages/Workspace/Index";
 import ColumnDropdown from "../Column/ColumnDropdown";
 import EditForm from "../Column/EditForm";
+import useToast from "@/hooks/useToast";
 
 type ColumnDragProps = {
     column: ColumnType;
@@ -30,8 +31,8 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
         useState<boolean>(false);
     const [editingColumn, setEditingColumn] = useState<boolean>(false);
     const formRef = useRef<HTMLFormElement | null>(null);
-    // const formRef = useRef<HTMLFormElement | null>(null);
     const { axiosInstance } = useAxios();
+    const showToast = useToast();
 
     const { handleSubmit, register, formState, reset, setError } =
         useForm<createTaskType>({
@@ -44,7 +45,7 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
         formState: formColumn,
         reset: resetColumn,
         setError: setErrorColumn,
-        setValue
+        setValue,
     } = useForm<createColumnType>({
         resolver: zodResolver(schema),
     });
@@ -76,7 +77,9 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
             .then(({ data }) => {
                 setColumns((prev) =>
                     prev.map((item) =>
-                        item.id === column.id ? {...column, name: data.column.name} : item
+                        item.id === column.id
+                            ? { ...column, name: data.column.name }
+                            : item
                     )
                 );
                 setEditingColumn(false);
@@ -89,6 +92,18 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                     });
                 });
             });
+    };
+
+    const deleteColumn = () => {
+        axiosInstance
+            .delete(`/column/${column.id}`)
+            .then(({data}) => {
+                setColumns((prev) =>
+                    prev.filter((item) => item.id !== column.id)
+                );
+                showToast(data.message, 'success');
+            })
+            .catch(() => showToast('Falha ao deletas lista', 'error'));
     };
 
     useEffect(() => {
@@ -138,7 +153,7 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                             className="flex justify-between items-center border-b border-gray-400 mx-3 mb-1 py-3"
                             {...provided.dragHandleProps}
                         >
-                            <EditForm 
+                            <EditForm
                                 editingColumn={editingColumn}
                                 setEditingColumn={setEditingColumn}
                                 column={column}
@@ -166,6 +181,7 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                                         setOpenDropdown={setOpenColumnDropdrown}
                                         setCreatingTask={setCreatingTask}
                                         setEditingColumn={setEditingColumn}
+                                        deleteColumn={deleteColumn}
                                     />
                                 </button>
                             </div>

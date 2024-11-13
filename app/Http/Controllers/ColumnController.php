@@ -76,7 +76,9 @@ class ColumnController extends Controller
      */
     public function destroy(Column $column)
     {
-        //
+        $column->delete();
+
+        return response()->json(['message' => "Coluna excluída"], 204);
     }
 
     public function reorderTasks (Request $request, Workspace $workspace, Column $column, Task $task)
