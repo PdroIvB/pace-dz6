@@ -2,17 +2,20 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { MoreVertical, Plus } from "lucide-react";
 import { Column as ColumnType } from "@/types/column";
 import TaskItem from "./TaskItem";
-import { useState } from "react";
+import { LegacyRef, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TaskCreateForm from "../Task/CreateForm";
 import { useAxios } from "@/hooks/useAxios";
+import { createColumnType } from "@/Pages/Workspace/Index";
+import ColumnDropdown from "../Column/ColumnDropdown";
+import EditForm from "../Column/EditForm";
 
 type ColumnDragProps = {
     column: ColumnType;
     index: number;
-    setColumns: React.Dispatch<React.SetStateAction<[] | ColumnType[]>>
+    setColumns: React.Dispatch<React.SetStateAction<[] | ColumnType[]>>;
 };
 
 const schema = z.object({
@@ -23,19 +26,35 @@ export type createTaskType = z.infer<typeof schema>;
 
 const Column = ({ column, index, setColumns }: ColumnDragProps) => {
     const [creatingTask, setCreatingTask] = useState<boolean>(false);
-    const {axiosInstance} = useAxios();
+    const [openColumnDropdown, setOpenColumnDropdrown] =
+        useState<boolean>(false);
+    const [editingColumn, setEditingColumn] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement | null>(null);
+    // const formRef = useRef<HTMLFormElement | null>(null);
+    const { axiosInstance } = useAxios();
 
     const { handleSubmit, register, formState, reset, setError } =
         useForm<createTaskType>({
             resolver: zodResolver(schema),
         });
 
+    const {
+        handleSubmit: handleColumn,
+        register: registerColumn,
+        formState: formColumn,
+        reset: resetColumn,
+        setError: setErrorColumn,
+        setValue
+    } = useForm<createColumnType>({
+        resolver: zodResolver(schema),
+    });
+
     const createTask = (data: createTaskType) => {
         axiosInstance
             .post("/task", { ...data, column_id: column.id })
-            .then(({data}) => {
+            .then(({ data }) => {
                 if (!column.tasks) {
-                    column.tasks = [data.task]
+                    column.tasks = [data.task];
                 } else {
                     column.tasks?.push(data.task);
                 }
@@ -50,6 +69,56 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                 });
             });
     };
+
+    const editColumn = (data: createColumnType) => {
+        axiosInstance
+            .put(`/column/${column.id}`, data)
+            .then(({ data }) => {
+                setColumns((prev) =>
+                    prev.map((item) =>
+                        item.id === column.id ? {...column, name: data.column.name} : item
+                    )
+                );
+                setEditingColumn(false);
+            })
+            .catch((errors) => {
+                Object.keys(errors).forEach((field: string) => {
+                    setError(field as keyof createTaskType, {
+                        type: "manual",
+                        message: errors[field],
+                    });
+                });
+            });
+    };
+
+    useEffect(() => {
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape" && editingColumn) {
+                setEditingColumn(false);
+                resetColumn();
+            }
+        };
+
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node;
+            if (formRef.current && !formRef.current.contains(target)) {
+                setEditingColumn(false);
+                resetColumn();
+            }
+        };
+
+        if (editingColumn) {
+            setValue("name", column.name);
+            document.addEventListener("keydown", handleEscape);
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            resetColumn();
+            document.removeEventListener("keydown", handleEscape);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [editingColumn, setEditingColumn]);
 
     return (
         <div className="h-fit">
@@ -66,18 +135,38 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                     >
                         {/* Header do card */}
                         <div
-                            className="flex justify-between items-center border-b border-gray-400 mx-3 mb-1 py-4"
+                            className="flex justify-between items-center border-b border-gray-400 mx-3 mb-1 py-3"
                             {...provided.dragHandleProps}
                         >
-                            <h2 className="font-semibold text-gray-700">
-                                {column.name}
-                            </h2>
+                            <EditForm 
+                                editingColumn={editingColumn}
+                                setEditingColumn={setEditingColumn}
+                                column={column}
+                                formState={formColumn}
+                                handleSubmit={handleColumn}
+                                submit={editColumn}
+                                register={registerColumn}
+                                reset={resetColumn}
+                                ref={formRef}
+                            />
                             <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-500">
+                                <span className="text-sm text-gray-500 ml-2">
                                     {column.tasks?.length ?? 0}
                                 </span>
-                                <button className="p-1 hover:bg-gray-300 rounded">
+                                <button
+                                    className="relative p-1 hover:bg-gray-300 rounded"
+                                    onClick={() =>
+                                        setOpenColumnDropdrown((prev) => !prev)
+                                    }
+                                >
                                     <MoreVertical className="w-4 h-4 text-gray-500" />
+                                    <ColumnDropdown
+                                        column={column}
+                                        openDropdown={openColumnDropdown}
+                                        setOpenDropdown={setOpenColumnDropdrown}
+                                        setCreatingTask={setCreatingTask}
+                                        setEditingColumn={setEditingColumn}
+                                    />
                                 </button>
                             </div>
                         </div>

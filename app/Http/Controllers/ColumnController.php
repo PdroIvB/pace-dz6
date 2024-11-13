@@ -62,7 +62,13 @@ class ColumnController extends Controller
      */
     public function update(Request $request, Column $column)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:3'
+        ]);
+
+        $column->update(['name' => $request->name]);
+
+        return response()->json(compact('column'));
     }
 
     /**

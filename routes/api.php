@@ -28,4 +28,5 @@ Route::middleware(['auth:sanctum', 'transform.keys'])->group(function () {
 
     Route::post('/task', [TaskController::class, 'store']);
     Route::post('/column', [ColumnController::class, 'store']);
+    Route::put('/column/{column}', [ColumnController::class, 'update']);
 });
