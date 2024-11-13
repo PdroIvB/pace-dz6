@@ -16,6 +16,7 @@ type ExtendedWorkspace = Workspace & {
 type DashboardProps = {
     workspaces: ExtendedWorkspace[];
     recentWorkspaces: Workspace[];
+    sharedWithMe: Workspace[];
 };
 
 const schema = z.object({
@@ -28,6 +29,7 @@ export default function Dashboard({
     auth,
     workspaces,
     recentWorkspaces,
+    sharedWithMe,
 }: PageProps & DashboardProps) {
     const [creatingWorkspace, setCreatingWorkspace] = useState<boolean>(false);
 
@@ -101,11 +103,15 @@ export default function Dashboard({
                         </div>
                     </div>
 
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg w-full">
-                        <h2 className="font-semibold text-xl text-gray-800 leading-tight p-2">
-                            Compartilhados comigo
-                        </h2>
-                    </div>
+                    {sharedWithMe ? (
+                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg w-full">
+                            <h2 className="font-semibold text-xl text-gray-800 leading-tight p-2">
+                                Compartilhados comigo
+                            </h2>
+                        </div>
+                    ) : (
+                        <></>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>
