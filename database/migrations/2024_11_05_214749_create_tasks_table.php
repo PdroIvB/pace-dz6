@@ -17,10 +17,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->unsignedTinyInteger('sequence');
-            $table->foreignIdFor(User::class, 'assignee_id')->nullable();
-            $table->foreignIdFor(Column::class, 'column_id')->nullable();
+            $table->integer('sequence');
+            $table->unsignedBigInteger('assignee_id')->nullable();
+            $table->foreign('assignee_id')->references('id')->on('users');
+            $table->foreignId('column_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
+
+            $table->index(['column_id', 'sequence']);
         });
     }
 

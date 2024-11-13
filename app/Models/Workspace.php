@@ -33,4 +33,9 @@ class Workspace extends Model
     {
         return $this->hasManyThrough(Task::class, Column::class);
     }
+
+    public function permissions ()
+    {
+        return $this->hasMany(Permission::class);
+    }
 }

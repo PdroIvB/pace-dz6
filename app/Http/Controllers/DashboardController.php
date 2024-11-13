@@ -14,6 +14,6 @@ class DashboardController extends Controller
             ->load('columns', 'participants')
             ->loadCount('tasks');
 
-        return Inertia::render('Dashboard', compact('workspaces'));
+        return Inertia::render('Authenticated/Dashboard', compact('workspaces'));
     }
 }

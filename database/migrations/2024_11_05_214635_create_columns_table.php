@@ -14,9 +14,14 @@ return new class extends Migration
         Schema::create('columns', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('workspace_id');
+            $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('sequence');
+            $table->foreignId('owner_id')->constrained(
+                table: 'users', indexName: 'columns_user_id'
+            )->cascadeOnDelete();
             $table->timestamps();
+
+            $table->index(['workspace_id', 'sequence']);
         });
     }
 

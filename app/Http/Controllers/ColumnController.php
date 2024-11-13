@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateColumnRequest;
 use App\Models\Column;
 use App\Models\Task;
 use App\Models\Workspace;
@@ -15,43 +16,13 @@ class ColumnController extends Controller
     ) {}
 
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateColumnRequest $request)
     {
-        //
-    }
+        $column = Column::create($request->validated());
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Column $column)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Column $column)
-    {
-        //
+        return response()->json(compact('column'));
     }
 
     /**
@@ -59,7 +30,13 @@ class ColumnController extends Controller
      */
     public function update(Request $request, Column $column)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:3'
+        ]);
+
+        $column->update(['name' => $request->name]);
+
+        return response()->json(compact('column'));
     }
 
     /**
@@ -67,7 +44,9 @@ class ColumnController extends Controller
      */
     public function destroy(Column $column)
     {
-        //
+        $column->delete();
+
+        return response()->json(['message' => "Coluna excluída"], 204);
     }
 
     public function reorderTasks (Request $request, Workspace $workspace, Column $column, Task $task)

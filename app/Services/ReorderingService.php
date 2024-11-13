@@ -26,9 +26,8 @@ class ReorderingService
             if ($modelId instanceof Model) {
                 $model = $modelId;
             } else {
-                $model = $modelClass::where($scopeKey, $scopeId)->findOrFail($modelId);
+                $model = $modelClass::findOrFail($modelId);
             }
-
 
             $oldSequence = $model->sequence;
 
@@ -109,14 +108,15 @@ class ReorderingService
             DB::beginTransaction();
 
             // Retrieve the task to move
-            $task = $taskId instanceof Task ? $taskId : Task::where('column_id', $sourceColumnId)->findOrFail($taskId);
+            $task = $taskId instanceof Task ? $taskId : Task::findOrFail($taskId);
 
-            // Step 1: Update the task's column ID to the target column
+            // Step 1: Open space for the new task
+            Task::where('column_id', $targetColumnId)->where('sequence', '>=', $newSequence)->increment('sequence');
+
+            // Step 2: Update the task's column ID to the target column
             $task->column_id = $targetColumnId;
+            $task->sequence = $newSequence;
             $task->save();
-
-            // Step 2: Reorder tasks in the target column to accommodate the moved task
-            $this->reorder(Task::class, $task->id, $newSequence, 'column_id', $targetColumnId);
 
             // Step 3: Reorder tasks in the source column to fill the gap
             $this->normalizeSequences(Task::class, 'column_id', $sourceColumnId);

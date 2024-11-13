@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Permission extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'can_read',
+        'can_edit',
+        'workspace_id',
+        'user_id',
+    ];
 }
