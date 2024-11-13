@@ -230,7 +230,6 @@ export default function Index({
         });
 
     const createColumn = (data: createColumnType) => {
-        console.log(data);
         axiosInstance
             .post("/column", { ...data, workspace_id: workspace.id })
             .then(({ data }) => {
