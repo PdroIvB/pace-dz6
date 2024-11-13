@@ -16,7 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('workspace_id');
             $table->unsignedTinyInteger('sequence');
+            $table->foreignId('owner_id');
             $table->timestamps();
+
+            $table->index(['workspace_id', 'sequence']);
         });
     }
 

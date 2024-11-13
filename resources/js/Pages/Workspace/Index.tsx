@@ -2,7 +2,7 @@ import Column from "@/Components/Workspace/Column";
 import { Column as ColumnType } from "@/types/column";
 import { Task } from "@/types/task";
 import { Workspace } from "@/types/workspace";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import {
@@ -15,7 +15,10 @@ import { Head } from "@inertiajs/react";
 import { PageProps } from "@/types";
 import { useAxios } from "@/hooks/useAxios";
 import useToast from "@/hooks/useToast";
-import { Plus } from "lucide-react";
+import ColumnCreateForm from "@/Components/Column/CreateForm";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const reorder = (
     list: Array<ColumnType | Task> | undefined,
@@ -50,6 +53,12 @@ const move = (
     };
 };
 
+const schema = z.object({
+    name: z.string().min(3, "O nome deve ter pelos menos 3 caracteres!"),
+});
+
+export type createColumnType = z.infer<typeof schema>;
+
 export default function Index({
     workspace,
     auth,
@@ -58,11 +67,13 @@ export default function Index({
 }) {
     const { axiosInstance } = useAxios();
     const showToast = useToast();
+    const [creatingColumn, setCreatingColumn] = useState<boolean>(false);
 
-    const [columns, setColumns] = useState<ColumnType[] | []>(workspace.columns || []);
+    const [columns, setColumns] = useState<ColumnType[] | []>(
+        workspace.columns || []
+    );
 
     const onDragEnd = (result: DropResult) => {
-
         // dropped nowhere
         if (!result.destination) {
             return;
@@ -98,7 +109,7 @@ export default function Index({
 
             axiosInstance
                 .put(`/workspace/${workspace.id}/column/${column.id}`, {
-                    newSequence: destination.index+1,
+                    newSequence: destination.index + 1,
                 })
                 .then((response) => {})
                 .catch((error) => {
@@ -112,7 +123,6 @@ export default function Index({
         if (result.type === "TASK") {
             //ordering within the same column
             if (source.droppableId === destination.droppableId) {
-
                 const colId = parseInt(
                     destination.droppableId.split(/-(?=\d+)/)[1],
                     10
@@ -136,9 +146,12 @@ export default function Index({
                 );
 
                 axiosInstance
-                    .put(`/workspace/${workspace.id}/column/${column.id}/task/${draggableId}`, {
-                        newSequence: destination.index+1,
-                    })
+                    .put(
+                        `/workspace/${workspace.id}/column/${column.id}/task/${draggableId}`,
+                        {
+                            newSequence: destination.index + 1,
+                        }
+                    )
                     .then((response) => {})
                     .catch((error) => {
                         console.error(error);
@@ -179,15 +192,22 @@ export default function Index({
 
                 setColumns((prevState) =>
                     prevState.map((col) =>
-                        col.id === sourceColumn.id ? sourceColumn : col.id === destinationColumn.id ? destinationColumn : col
+                        col.id === sourceColumn.id
+                            ? sourceColumn
+                            : col.id === destinationColumn.id
+                            ? destinationColumn
+                            : col
                     )
                 );
 
                 axiosInstance
-                    .put(`/workspace/${workspace.id}/column/${sourceColumnId}/task/${draggableId}/move`, {
-                        newSequence: destination.index+1,
-                        destinationColumnId: destinationColumnId
-                    })
+                    .put(
+                        `/workspace/${workspace.id}/column/${sourceColumnId}/task/${draggableId}/move`,
+                        {
+                            newSequence: destination.index + 1,
+                            destinationColumnId: destinationColumnId,
+                        }
+                    )
                     .then((response) => {})
                     .catch((error) => {
                         console.error(error);
@@ -199,6 +219,29 @@ export default function Index({
         }
 
         return;
+    };
+
+    const { handleSubmit, register, formState, reset, setError } =
+        useForm<createColumnType>({
+            resolver: zodResolver(schema),
+        });
+
+    const createColumn = (data: createColumnType) => {
+        console.log(data);
+        axiosInstance
+            .post("/column", { ...data, workspace_id: workspace.id })
+            .then(({ data }) => {
+                setColumns((prev) => [...prev, data.column]);
+                setCreatingColumn(false);
+            })
+            .catch((errors) => {
+                Object.keys(errors).forEach((field: string) => {
+                    setError(field as keyof createColumnType, {
+                        type: "manual",
+                        message: errors[field],
+                    });
+                });
+            });
     };
 
     return (
@@ -219,7 +262,13 @@ export default function Index({
                                 direction="horizontal"
                             >
                                 {(provided, snapshot) => (
-                                    <div className={`${snapshot.isDraggingOver ? "bg-green-200" : ""}`}>
+                                    <div
+                                        className={`${
+                                            snapshot.isDraggingOver
+                                                ? "bg-green-200"
+                                                : ""
+                                        }`}
+                                    >
                                         <div className="w-full mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
                                             <div
                                                 ref={provided.innerRef}
@@ -236,16 +285,21 @@ export default function Index({
                                                                 key={column.id}
                                                                 column={column}
                                                                 index={index}
+                                                                setColumns={setColumns}
                                                             />
                                                         );
                                                     }
                                                 )}
                                                 {provided.placeholder}
-                                                <div className="bg-gray-300 max-h-fit w-80 min-w-fit rounded-xl p-4 bg-opacity-40 hover:bg-gray-400 hover:bg-opacity-40 cursor-pointer">
-                                                    <div className="flex gap-2 flex-shrink-0">
-                                                        <Plus/><p className="">Adicionar outra lista</p>
-                                                    </div>
-                                                </div>
+                                                <ColumnCreateForm
+                                                    creatingColumn={creatingColumn}
+                                                    setCreatingColumn={setCreatingColumn}
+                                                    handleSubmit={handleSubmit}
+                                                    register={register}
+                                                    formState={formState}
+                                                    reset={reset}
+                                                    submit={createColumn}
+                                                />
                                             </div>
                                         </div>
                                     </div>

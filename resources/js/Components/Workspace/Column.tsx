@@ -6,13 +6,13 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router } from "@inertiajs/react";
 import TaskCreateForm from "../Task/CreateForm";
 import { useAxios } from "@/hooks/useAxios";
 
 type ColumnDragProps = {
     column: ColumnType;
     index: number;
+    setColumns: React.Dispatch<React.SetStateAction<[] | ColumnType[]>>
 };
 
 const schema = z.object({
@@ -21,7 +21,7 @@ const schema = z.object({
 
 export type createTaskType = z.infer<typeof schema>;
 
-const Column = ({ column, index }: ColumnDragProps) => {
+const Column = ({ column, index, setColumns }: ColumnDragProps) => {
     const [creatingTask, setCreatingTask] = useState<boolean>(false);
     const {axiosInstance} = useAxios();
 
@@ -34,7 +34,11 @@ const Column = ({ column, index }: ColumnDragProps) => {
         axiosInstance
             .post("/task", { ...data, column_id: column.id })
             .then(({data}) => {
-                column.tasks?.push(data.task);
+                if (!column.tasks) {
+                    column.tasks = [data.task]
+                } else {
+                    column.tasks?.push(data.task);
+                }
                 setCreatingTask(false);
             })
             .catch((errors) => {
@@ -72,7 +76,7 @@ const Column = ({ column, index }: ColumnDragProps) => {
                                 <span className="text-sm text-gray-500">
                                     {column.tasks?.length ?? 0}
                                 </span>
-                                <button className="p-1 hover:bg-gray-200 rounded">
+                                <button className="p-1 hover:bg-gray-300 rounded">
                                     <MoreVertical className="w-4 h-4 text-gray-500" />
                                 </button>
                             </div>

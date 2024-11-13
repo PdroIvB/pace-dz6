@@ -27,4 +27,5 @@ Route::middleware(['auth:sanctum', 'transform.keys'])->group(function () {
     Route::put('/workspace/{workspace}/column/{column}/task/{task}/move', [ColumnController::class, 'moveTask']);
 
     Route::post('/task', [TaskController::class, 'store']);
+    Route::post('/column', [ColumnController::class, 'store']);
 });

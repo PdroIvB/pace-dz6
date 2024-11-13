@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateColumnRequest;
 use App\Models\Column;
 use App\Models\Task;
 use App\Models\Workspace;
@@ -33,9 +34,11 @@ class ColumnController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateColumnRequest $request)
     {
-        //
+        $column = Column::create($request->validated());
+
+        return response()->json(compact('column'));
     }
 
     /**
