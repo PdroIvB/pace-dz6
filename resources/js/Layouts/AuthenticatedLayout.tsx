@@ -8,14 +8,15 @@ import { PageProps, User } from "@/types";
 import useToast from "@/hooks/useToast";
 
 export default function Authenticated({
-    user,
-    header,
+    // user,
+    // header,
     children,
-}: PropsWithChildren<{ user: User; header?: ReactNode }>) {
+}: PropsWithChildren) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
     const showToast = useToast();
-    const { flash } = usePage<PageProps>().props;
+    const { flash, auth } = usePage<PageProps>().props;
+    const user = auth.user;
 
     useEffect(() => {
         if (flash?.error) {
@@ -177,13 +178,13 @@ export default function Authenticated({
                 </div>
             </nav>
 
-            {header && (
+            {/* {header && (
                 <header className="bg-white shadow">
                     <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                         {header}
                     </div>
                 </header>
-            )}
+            )} */}
 
             <main className="h-[calc(100%-49px)]">{children}</main>
         </div>

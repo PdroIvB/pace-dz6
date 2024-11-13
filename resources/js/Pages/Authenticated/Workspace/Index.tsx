@@ -2,7 +2,7 @@ import Column from "@/Components/Workspace/Column";
 import { Column as ColumnType } from "@/types/column";
 import { Task } from "@/types/task";
 import { Workspace } from "@/types/workspace";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 
 import {
@@ -19,6 +19,7 @@ import ColumnCreateForm from "@/Components/Column/CreateForm";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createWorkspaceType } from "../Dashboard";
 
 const reorder = (
     list: Array<ColumnType | Task> | undefined,
@@ -68,6 +69,8 @@ export default function Index({
     const { axiosInstance } = useAxios();
     const showToast = useToast();
     const [creatingColumn, setCreatingColumn] = useState<boolean>(false);
+    const [editingWorkspace, setEditingWorkspace] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const [columns, setColumns] = useState<ColumnType[] | []>(
         workspace.columns || []
@@ -244,71 +247,152 @@ export default function Index({
             });
     };
 
+    const editWorkspace = (data: createWorkspaceType) => {
+        console.log(data);
+        axiosInstance
+        .put(`/workspace/${workspace.id}`, data)
+        .then((response) => {
+            workspace.name = response.data.workspace.name;
+            setEditingWorkspace(false);
+        })
+        .catch((errors) => {
+            Object.keys(errors).forEach((field: string) => {
+                setError(field as keyof createWorkspaceType, {
+                    type: "manual",
+                    message: errors[field],
+                });
+            });
+        });
+    };
+
+    const {
+        handleSubmit: handleWorkspace,
+        register: registerWorkspace,
+        formState: { errors },
+        reset: resetWorkspace,
+        setError: setErrorWorkspace,
+        setValue,
+    } = useForm<createWorkspaceType>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            name: workspace.name,
+        },
+    });
+
+    useEffect(() => {
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape" && editingWorkspace) {
+                setEditingWorkspace(false);
+                reset();
+            }
+        };
+
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Node;
+            if (formRef.current && !formRef.current.contains(target)) {
+                setEditingWorkspace(false);
+                reset();
+            }
+        };
+
+        if (editingWorkspace) {
+            setValue("name", workspace.name);
+            document.addEventListener("keydown", handleEscape);
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            reset();
+            document.removeEventListener("keydown", handleEscape);
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [editingWorkspace, setEditingWorkspace]);
+
     return (
         <>
-            <AuthenticatedLayout user={auth.user}>
-                <Head title={workspace.name} />
-                <div className="max-h-full">
-                    <div className="py-4 pl-8">
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            {workspace.name}
-                        </h1>
-                    </div>
-                    <div className="">
-                        <DragDropContext onDragEnd={onDragEnd}>
-                            <Droppable
-                                droppableId="board"
-                                type="COLUMN"
-                                direction="horizontal"
-                            >
-                                {(provided, snapshot) => (
-                                    <div
-                                        className={`${
-                                            snapshot.isDraggingOver
-                                                ? "bg-green-200"
-                                                : ""
-                                        }`}
-                                    >
-                                        <div className="w-full mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
-                                            <div
-                                                ref={provided.innerRef}
-                                                {...provided.droppableProps}
-                                                className="flex gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 h-[calc(100svh-125px)] "
-                                            >
-                                                {columns.map(
-                                                    (
-                                                        column: ColumnType,
-                                                        index: number
-                                                    ) => {
-                                                        return (
-                                                            <Column
-                                                                key={column.id}
-                                                                column={column}
-                                                                index={index}
-                                                                setColumns={setColumns}
-                                                            />
-                                                        );
-                                                    }
-                                                )}
-                                                {provided.placeholder}
-                                                <ColumnCreateForm
-                                                    creatingColumn={creatingColumn}
-                                                    setCreatingColumn={setCreatingColumn}
-                                                    handleSubmit={handleSubmit}
-                                                    register={register}
-                                                    formState={formState}
-                                                    reset={reset}
-                                                    submit={createColumn}
-                                                />
-                                            </div>
+            <Head title={workspace.name} />
+            <div className="max-h-full">
+                <div className="">
+                    {!editingWorkspace ? (
+                        <button
+                            className="py-[21px] pl-[37px] w-fit"
+                            onClick={() => setEditingWorkspace(true)}
+                        >
+                            <h1 className="text-3xl font-bold text-gray-800">
+                                {workspace.name}
+                            </h1>
+                        </button>
+                    ) : (
+                        <form
+                            onSubmit={handleWorkspace(editWorkspace)}
+                            ref={formRef}
+                            className="py-4 pl-8 w-full"
+                        >
+                            <input
+                                type="text"
+                                className={`w-1/3 text-start px-1 py-1 rounded-lg focus:bg-white ${
+                                    errors.name
+                                        ? "border-red-400 focus:border-red-500"
+                                        : "border-gray-200 focus:border-blue-500"
+                                } text-gray-900 text-3xl font-extrabold`}
+                                {...registerWorkspace("name")}
+                                autoFocus
+                            />
+                        </form>
+                    )}
+                </div>
+                <div className="">
+                    <DragDropContext onDragEnd={onDragEnd}>
+                        <Droppable
+                            droppableId="board"
+                            type="COLUMN"
+                            direction="horizontal"
+                        >
+                            {(provided, snapshot) => (
+                                <div>
+                                    <div className="w-full mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.droppableProps}
+                                            className="flex gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 h-[calc(100svh-130px)] "
+                                        >
+                                            {columns.map(
+                                                (
+                                                    column: ColumnType,
+                                                    index: number
+                                                ) => {
+                                                    return (
+                                                        <Column
+                                                            key={column.id}
+                                                            column={column}
+                                                            index={index}
+                                                            setColumns={
+                                                                setColumns
+                                                            }
+                                                        />
+                                                    );
+                                                }
+                                            )}
+                                            {provided.placeholder}
+                                            <ColumnCreateForm
+                                                creatingColumn={creatingColumn}
+                                                setCreatingColumn={
+                                                    setCreatingColumn
+                                                }
+                                                handleSubmit={handleSubmit}
+                                                register={register}
+                                                formState={formState}
+                                                reset={reset}
+                                                submit={createColumn}
+                                            />
                                         </div>
                                     </div>
-                                )}
-                            </Droppable>
-                        </DragDropContext>
-                    </div>
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
                 </div>
-            </AuthenticatedLayout>
+            </div>
         </>
     );
 }

@@ -1,17 +1,17 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, router } from '@inertiajs/react';
-import { PageProps } from '@/types';
-import { Workspace } from '@/types/workspace';
-import { Plus } from 'lucide-react';
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Head, router } from "@inertiajs/react";
+import { PageProps } from "@/types";
+import { ExtendedWorkspace, Workspace } from "@/types/workspace";
+import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import WorkspaceCreateForm from "../Components/Workspace/CreateForm";
-
-type ExtendedWorkspace = Workspace & {
-    tasks_count: number;
-};
+import WorkspaceCreateForm from "../../Components/Workspace/CreateForm";
+import WorkspaceDropdown from "@/Components/Workspace/WorkspaceDropdown";
+import { useAxios } from "@/hooks/useAxios";
+import useToast from "@/hooks/useToast";
+import WorkspaceCard from "@/Components/Workspace/WorkspaceCard";
 
 type DashboardProps = {
     workspaces: ExtendedWorkspace[];
@@ -31,6 +31,9 @@ export default function Dashboard({
     recentWorkspaces,
     sharedWithMe,
 }: PageProps & DashboardProps) {
+    const [stateWorkspaces, setStateWorkspaces] = useState<
+        ExtendedWorkspace[] | []
+    >(workspaces ?? []);
     const [creatingWorkspace, setCreatingWorkspace] = useState<boolean>(false);
 
     const { handleSubmit, register, formState, reset, setError } =
@@ -52,15 +55,12 @@ export default function Dashboard({
     };
 
     return (
-        <AuthenticatedLayout
-            user={auth.user}
-            // header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
-        >
+        <>
             <Head title="Dashboard" />
 
             <div className="pb-12 pt-4">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
-                    {recentWorkspaces && recentWorkspaces.length > 0 && (
+                    {recentWorkspaces && (
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg w-full">
                             <h2 className="font-semibold text-xl text-gray-800 leading-tight p-2">
                                 Visualidados recentemente
@@ -68,28 +68,17 @@ export default function Dashboard({
                         </div>
                     )}
 
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg w-full p-4">
+                    <div className="bg-white  shadow-sm sm:rounded-lg w-full p-4">
                         <h2 className="font-semibold text-xl text-gray-800 leading-tight mb-4">
                             Minhas Áreas de trabalho
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {workspaces.map((workspace) => (
-                                <div
-                                    onClick={() =>
-                                        router.get(`/workspace/${workspace.id}`)
-                                    }
+                            {stateWorkspaces.map((workspace) => (
+                                <WorkspaceCard
                                     key={workspace.id}
-                                    className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-lg hover:scale-102 transform transition-all duration-200 cursor-pointer group"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h2 className="text-lg font-semibold text-gray-700 group-hover:text-blue-600 transition-colors duration-200">
-                                            {workspace.name}
-                                        </h2>
-                                        <span className="text-sm text-gray-500">
-                                            {workspace.tasks_count} tasks
-                                        </span>
-                                    </div>
-                                </div>
+                                    workspace={workspace}
+                                    setStateWorkspaces={setStateWorkspaces}
+                                />
                             ))}
                             <WorkspaceCreateForm
                                 creatingWorkspace={creatingWorkspace}
@@ -114,6 +103,6 @@ export default function Dashboard({
                     )}
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </>
     );
 }

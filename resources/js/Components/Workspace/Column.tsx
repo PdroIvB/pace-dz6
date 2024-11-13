@@ -2,13 +2,13 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import { MoreVertical, Plus } from "lucide-react";
 import { Column as ColumnType } from "@/types/column";
 import TaskItem from "./TaskItem";
-import { LegacyRef, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TaskCreateForm from "../Task/CreateForm";
 import { useAxios } from "@/hooks/useAxios";
-import { createColumnType } from "@/Pages/Workspace/Index";
+import { createColumnType } from "@/Pages/Authenticated/Workspace/Index";
 import ColumnDropdown from "../Column/ColumnDropdown";
 import EditForm from "../Column/EditForm";
 import useToast from "@/hooks/useToast";
@@ -97,13 +97,13 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
     const deleteColumn = () => {
         axiosInstance
             .delete(`/column/${column.id}`)
-            .then(({data}) => {
+            .then(({ data }) => {
                 setColumns((prev) =>
                     prev.filter((item) => item.id !== column.id)
                 );
-                showToast(data.message, 'success');
+                showToast(data.message, "success");
             })
-            .catch(() => showToast('Falha ao deletas lista', 'error'));
+            .catch(() => showToast("Falha ao deletar lista", "error"));
     };
 
     useEffect(() => {
@@ -144,7 +144,7 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                         {...provided.draggableProps}
                         className={`flex-shrink-0 w-80 bg-gray-200 rounded-lg ${
                             snapshot.isDragging
-                                ? "bg-blue-200 border-2 border-black text-blue-700"
+                                ? "border-2 border-black"
                                 : ""
                         }`}
                     >
@@ -176,7 +176,6 @@ const Column = ({ column, index, setColumns }: ColumnDragProps) => {
                                 >
                                     <MoreVertical className="w-4 h-4 text-gray-500" />
                                     <ColumnDropdown
-                                        column={column}
                                         openDropdown={openColumnDropdown}
                                         setOpenDropdown={setOpenColumnDropdrown}
                                         setCreatingTask={setCreatingTask}

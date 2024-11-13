@@ -27,7 +27,7 @@ export default function ResetPassword({ token, email }: { token: string, email: 
     };
 
     return (
-        <GuestLayout>
+        <>
             <Head title="Reset Password" />
 
             <form onSubmit={submit}>
@@ -85,6 +85,6 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                     </PrimaryButton>
                 </div>
             </form>
-        </GuestLayout>
+        </>
     );
 }

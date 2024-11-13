@@ -22,11 +22,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware(['auth:sanctum', 'transform.keys'])->group(function () {
+    Route::put('/workspace/{workspace}', [WorkspaceController::class, 'update']);
+    Route::delete('/workspace/{workspace}', [WorkspaceController::class, 'destroy']);
+
     Route::put('/workspace/{workspace}/column/{column}', [WorkspaceController::class, 'reorderColumns']);
     Route::put('/workspace/{workspace}/column/{column}/task/{task}', [ColumnController::class, 'reorderTasks']);
     Route::put('/workspace/{workspace}/column/{column}/task/{task}/move', [ColumnController::class, 'moveTask']);
 
     Route::post('/task', [TaskController::class, 'store']);
+
     Route::post('/column', [ColumnController::class, 'store']);
     Route::put('/column/{column}', [ColumnController::class, 'update']);
     Route::delete('/column/{column}', [ColumnController::class, 'destroy']);

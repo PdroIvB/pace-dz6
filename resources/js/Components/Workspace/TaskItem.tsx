@@ -15,7 +15,7 @@ function TaskItem({ task, provided, snapshot }: TaskItemProps) {
                 ref={provided.innerRef}
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
-                className={`rounded-lg shadow-sm border border-gray-00 p-2 hover:shadow-md transition-shadow duration-200 cursor-pointer ${snapshot.isDragging ? "bg-blue-200 border-2 border-black text-blue-700" : "bg-white"}`}
+                className={`rounded-lg shadow-sm border border-gray-00 p-2 hover:shadow-md transition-shadow duration-200 cursor-pointer bg-white ${snapshot.isDragging ? "border-2 border-black" : ""}`}
             >
                 <div>
                     <div>{task.name}</div>

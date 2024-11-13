@@ -9,3 +9,7 @@ export interface Workspace {
     columns: Column[] | null;
     participants?: User[];
 }
+
+export type ExtendedWorkspace = Workspace & {
+    tasks_count: number;
+};

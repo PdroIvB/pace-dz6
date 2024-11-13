@@ -1,5 +1,5 @@
-import { createColumnType } from "@/Pages/Authenticated/Workspace/Index";
-import { Column } from "@/types/column";
+import { createWorkspaceType } from "@/Pages/Authenticated/Dashboard";
+import { Workspace } from "@/types/workspace";
 import { forwardRef, LegacyRef, useEffect } from "react";
 import {
     FormState,
@@ -9,21 +9,21 @@ import {
 } from "react-hook-form";
 
 type EditFormProps = {
-    editingColumn: boolean;
-    setEditingColumn: React.Dispatch<React.SetStateAction<boolean>>;
-    column: Column;
-    handleSubmit: UseFormHandleSubmit<createColumnType, undefined>;
-    submit: (data: createColumnType) => void;
-    register: UseFormRegister<createColumnType>;
-    formState: FormState<createColumnType>;
-    reset: UseFormReset<createColumnType>;
+    editingWorkspace: boolean;
+    setEditingWorkspace: React.Dispatch<React.SetStateAction<boolean>>;
+    workspace: Workspace;
+    handleSubmit: UseFormHandleSubmit<createWorkspaceType, undefined>;
+    submit: (data: createWorkspaceType) => void;
+    register: UseFormRegister<createWorkspaceType>;
+    formState: FormState<createWorkspaceType>;
+    reset: UseFormReset<createWorkspaceType>;
 };
 
 const EditForm = forwardRef(function EditForm(
     {
-        editingColumn,
-        setEditingColumn,
-        column,
+        editingWorkspace,
+        setEditingWorkspace,
+        workspace,
         handleSubmit,
         formState,
         register,
@@ -34,19 +34,31 @@ const EditForm = forwardRef(function EditForm(
 ) {
     const { errors, isValid } = formState;
 
-    if (!editingColumn) {
+    if (!editingWorkspace) {
         return (
             <button
-                onClick={() => setEditingColumn(true)}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingWorkspace(true);
+                }}
                 className="w-fit px-[5px] py-[5px] rounded-lg focus:bg-white text-start"
             >
-                <h2 className="font-semibold text-gray-700">{column.name}</h2>
+                <h2 className="text-lg font-semibold text-gray-700 group-hover:text-blue-600 transition-colors duration-200">
+                    {workspace.name}
+                </h2>
             </button>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit(submit)} ref={ref} className="w-full">
+        <form
+            onSubmit={(e) => {
+                e.stopPropagation();
+                handleSubmit(submit)(e);
+            }}
+            ref={ref}
+            className="w-full"
+        >
             <div className="">
                 <input
                     type="text"
@@ -54,7 +66,7 @@ const EditForm = forwardRef(function EditForm(
                         errors.name
                             ? "border-red-400 focus:border-red-500"
                             : "border-gray-200 focus:border-blue-500"
-                    } text-gray-800 font-bold`}
+                    } text-gray-800 text-lg font-bold`}
                     {...register("name")}
                     autoFocus
                 />

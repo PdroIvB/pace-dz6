@@ -18,22 +18,6 @@ class WorkspaceController extends Controller
     ) {}
 
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(CreateWorkspaceRequest $request)
@@ -57,15 +41,7 @@ class WorkspaceController extends Controller
     {
         $workspace->load('columns.tasks');
 
-        return Inertia::render('Workspace/Index', compact('workspace'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Workspace $workspace)
-    {
-        //
+        return Inertia::render('Authenticated/Workspace/Index', compact('workspace'));
     }
 
     /**
@@ -73,7 +49,13 @@ class WorkspaceController extends Controller
      */
     public function update(Request $request, Workspace $workspace)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|min:3'
+        ]);
+
+        $workspace->update(['name' => $request->name]);
+
+        return response()->json(compact('workspace'));
     }
 
     /**
@@ -81,7 +63,9 @@ class WorkspaceController extends Controller
      */
     public function destroy(Workspace $workspace)
     {
-        //
+        $workspace->delete();
+
+        return response()->json(['message' => "Área de Trabalho excluída"], 204);
     }
 
     public function reorderColumns(Request $request, Workspace $workspace, Column $column)

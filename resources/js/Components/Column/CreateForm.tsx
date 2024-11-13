@@ -6,7 +6,7 @@ import {
     UseFormRegister,
     UseFormReset,
 } from "react-hook-form";
-import { createColumnType } from "@/Pages/Workspace/Index";
+import { createColumnType } from "@/Pages/Authenticated/Workspace/Index";
 
 type ColumnCreateFormProps = {
     setCreatingColumn: React.Dispatch<React.SetStateAction<boolean>>;
