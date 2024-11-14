@@ -1,66 +1,110 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<p align="center"><a href="https://github.com/PdroIvB/pace-dz6" target="_blank"><img src="storage\app\public\logopace.png" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Sobre o Projeto
 
-## About Laravel
+P.A.C.E. - Produção e Acompanhamento de Controle Eficiente </br>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+É um software criado, a princípio, para disciplina de Prática Profissional> Projeto de Software do grupo 36. </br>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+A ideia do sistema é ser uma ferramenta de gerenciamento de software segundo a metodologia ágil Kanban. Onde um gestor poderia criar uma Área de Trabalho (quadro)
+e convidar colaboradores para criar e organizar cartões (tarefas). </br>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# Rodando
 
-## Learning Laravel
+## Dependências
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Download e instalação
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Antes de começarmos a trabalhar no projeto, temos que instalar as dependências primeiro.</br>
+Vamos começar instalando os pré-clone, que consistem em dependências muito importantes para o bom funcionamento futuro do projeto.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+#### Pré Clone
 
-## Laravel Sponsors
+ - [NPM](https://nodejs.org/en) </br>
+ - [git](https://git-scm.com/) </br>
+ - [Composer](https://getcomposer.org/download/) </br>
+ - [PHP](https://www.php.net/) </br>
+ - [MySQL](https://www.mysql.com/) </br>
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+---
 
-### Premium Partners
+## Clonando
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Acesse o GitHub na página do projeto. Assim que a página carregar, procure por um botão escrito <b>Code</b>. Clicando sobre ele, você verá as siglas HTTPS, onde encontrará o link que deverá ser copiado.
 
-## Contributing
+No terminal digite o seguinte comando: </br>
+```shell
+git clone *link https*
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Aguarde até o projeto ser clonado em sua máquina e, em seguida, entre na pasta do arquivo.</br>
+```shell
+cd pace-dz6
+```
 
-## Code of Conduct
+## Instalação
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Diretorio /full-stack-test
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+No terminal:</br>
+```shell
+composer install
+```
+Aguarde ate finalizar e digite</br>
+```shell
+ npm install
+```
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Configurações
+
+### Arquivos .ENV
+
+---
+
+Copie o .env.example para um .env apropriado </br>
+```shell
+cp .env.example .env
+```
+
+#### .ENV do Back 
+
+Preencha as credenciais, principalmente da conexão com o banco de dados (crie um banco de dados no seu servidor para o projeto)
+
+` DB_CONNECTION=mysql ` </br>
+` DB_HOST=127.0.0.1 ` </br>
+` DB_PORT=3306 ` </br>
+` DB_DATABASE=laravel ` </br>
+` DB_USERNAME=root ` </br>
+` DB_PASSWORD= ` </br>
+
+---
+
+## Criando o banco de dados
+
+Agora com a conxão configurada, na pasta raiz do projeto, você pode rodar:
+```shell
+php artisan migrate:fresh
+```
+
+Assim você terá toda a estrutura novinha do banco de dados.
+
+# Rodando o projeto!
+
+Para rodar o projeto agora, basta, nas pasta raiz `/` rodar o comando:
+
+```shell
+php artisan serve
+```
+
+E o comando:
+
+```shell
+npm run dev
+```
+
+E tanto o front quando o back devem estar funcionando. </br>
+Agora basta acessar seu navegador em ` http://localhost:8000 `
